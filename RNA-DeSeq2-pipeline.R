@@ -4,7 +4,7 @@ options(scipen=999)
 
 #input section
 NameOfControl = "ctrl"
-ProjectName <- "RNA-DeSeq2-pipeline_all runs"
+ProjectName <- "RNA-DeSeq2-pipeline_all-runs_HG38"
 
 #Working directory
 setwd(paste(rstudioapi::getSourceEditorContext()$path, "/../..", sep = ""))
@@ -27,7 +27,8 @@ library("tximport")
 ListWithSpecifications <- list.files(path = "Input_files/Specifications", pattern = ".txt")
 
 #load all genes-ENSG ID-connection
-tx2gene <- read.table(file = "Input_files/tx2gene.csv", sep = ",", header = TRUE)
+warning("Using short annotated tx2gene file!")
+tx2gene <- read.table(file = "Input_files/tx2gene_hg38_short.csv", sep = ",", header = TRUE)
 
 #loop for input of all samples
 i <- 1
@@ -36,8 +37,8 @@ for(i in 1:length(ListWithSpecifications)){
   rownames(subdat) <- subdat$run
   
   #reorder factors because of DeSeq2 uses factors ordered by alphabet
-  PositionCTRL <- which(levels(subdat$sample) == NameOfControl)
-  PositionNoCTRL <- which(levels(subdat$sample) != NameOfControl)
+  PositionCTRL <- which(levels(factor(subdat$sample)) == NameOfControl)
+  PositionNoCTRL <- which(levels(factor(subdat$sample)) != NameOfControl)
   subdat$sample <- factor(subdat$sample, levels(factor(subdat$sample))[c(PositionCTRL, PositionNoCTRL)])
   
   
@@ -61,6 +62,9 @@ for(i in 1:length(ListWithSpecifications)){
   NameNoDim <- sub('\\.txt$', '', ListWithSpecifications[i])
   write.table(df_export, 
               file = paste("R stuff/ExtractedData_", ProjectName, "/", NameNoDim, ".tsv" , sep = ""), row.names = TRUE)
+  # write.table(df_export,
+  #           file = paste("R/ExtractedData/", NameNoDim, ".txt" , sep = ""))
+
 }
 
 
